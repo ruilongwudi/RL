@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>❤️ 睿睿宝宝和龙龙狗屁❤️</title>
+    <title>❤️ 我们的爱情日记 ❤️</title>
     <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
@@ -11,6 +11,9 @@
             --secondary: #7FC7D4;
             --text: #2C3E50;
             --bg: #F8F9FA;
+            --happy: #FFD700;
+            --playful: #FF69B4;
+            --love: #89C4F4;
         }
 
         body {
@@ -76,6 +79,10 @@
             background-size: cover;
             border-radius: 15px;
             box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        .photo-card:hover {
+            transform: scale(1.03);
         }
 
         .upload-section {
@@ -86,25 +93,53 @@
             text-align: center;
         }
 
-        .note-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            justify-content: center;
-            align-items: center;
-        }
-
+        /* 优化后的笔记编辑器 */
         .note-editor {
             background: white;
-            width: 90%;
-            max-width: 600px;
-            padding: 2rem;
             border-radius: 20px;
-            position: relative;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: 2rem auto;
+        }
+
+        .editor-header {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .category-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .category-btn.active {
+            transform: scale(1.1);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+        .happy { background: var(--happy); }
+        .playful { background: var(--playful); color: white; }
+        .love { background: var(--love); color: white; }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 1rem;
+            border: 2px solid var(--primary);
+            border-radius: 15px;
+            resize: vertical;
+            font-size: 16px;
+        }
+
+        .note-item {
+            background: white;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
         }
     </style>
 </head>
@@ -128,28 +163,26 @@
     <section id="gallery" class="page">
         <div class="upload-section">
             <input type="file" id="fileInput" multiple accept="image/*" hidden>
-            <label for="fileInput" class="nav-btn">选择照片</label>
-            <button onclick="uploadPhoto()" class="nav-btn">开始上传</button>
-            <div id="uploadStatus"></div>
+            <label for="fileInput" class="nav-btn">📷 选择照片</label>
+            <button onclick="uploadPhoto()" class="nav-btn">🚀 开始上传</button>
+            <div id="uploadStatus" style="margin-top:1rem"></div>
         </div>
         <div class="photo-grid" id="photoGrid"></div>
     </section>
 
     <!-- 恋爱笔记 -->
     <section id="notes" class="page">
-        <button onclick="openEditor()" class="nav-btn">新建笔记</button>
+        <div class="note-editor">
+            <div class="editor-header">
+                <button class="category-btn happy active" onclick="selectCategory('happy')">开心时刻</button>
+                <button class="category-btn playful" onclick="selectCategory('playful')">臭狗屁</button>
+                <button class="category-btn love" onclick="selectCategory('love')">爱宝宝</button>
+            </div>
+            <textarea id="noteContent" placeholder="记录我们的甜蜜故事..."></textarea>
+            <button onclick="saveNote()" class="nav-btn" style="margin-top:1.5rem">💾 保存笔记</button>
+        </div>
         <div id="noteList"></div>
     </section>
-
-    <!-- 笔记编辑器 -->
-    <div id="noteModal" class="note-modal">
-        <div class="note-editor">
-            <span class="close-btn" onclick="closeEditor()">&times;</span>
-            <input type="text" id="noteTitle" placeholder="笔记标题">
-            <textarea id="noteContent" rows="10" placeholder="记录甜蜜时刻..."></textarea>
-            <button onclick="saveNote()" class="nav-btn">保存笔记</button>
-        </div>
-    </div>
 
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
@@ -157,7 +190,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
 
     <script>
-        // 🔥 配置Firebase（需替换）
+        // 🔥 配置Firebase（必须替换）
         const firebaseConfig = {
             apiKey: "YOUR_API_KEY",
             authDomain: "YOUR_PROJECT.firebaseapp.com",
@@ -172,16 +205,113 @@
         const db = firebase.firestore();
         const storage = firebase.storage();
 
-        // 修复页面切换
-        function showPage(pageId) {
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-            
-            document.querySelector(`[onclick="showPage('${pageId}')"]`).classList.add('active');
-            document.getElementById(pageId).classList.add('active');
+        // 🚀 修复照片上传功能
+        async function uploadPhoto() {
+            const files = document.getElementById('fileInput').files;
+            if(files.length === 0) {
+                alert('请先选择要上传的照片！');
+                return;
+            }
+
+            try {
+                for(const file of files) {
+                    // 生成唯一文件名
+                    const filename = `${Date.now()}_${file.name}`;
+                    const storageRef = storage.ref(`photos/${filename}`);
+                    
+                    // 显示上传状态
+                    document.getElementById('uploadStatus').textContent = `正在上传 ${file.name}...`;
+
+                    // 执行上传
+                    const snapshot = await storageRef.put(file);
+                    
+                    // 获取下载链接
+                    const downloadURL = await snapshot.ref.getDownloadURL();
+                    
+                    // 保存到数据库
+                    await db.collection('photos').add({
+                        url: downloadURL,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    
+                    document.getElementById('uploadStatus').textContent = `${file.name} 上传成功！`;
+                    setTimeout(() => document.getElementById('uploadStatus').textContent = '', 3000);
+                }
+                loadPhotos();
+            } catch (error) {
+                console.error('上传失败:', error);
+                alert(`上传失败: ${error.message}`);
+            }
         }
 
-        // 修复纪念日倒计时
+        // 💌 分类功能实现
+        let selectedCategory = 'happy';
+        function selectCategory(category) {
+            selectedCategory = category;
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        // 📝 优化笔记保存功能
+        async function saveNote() {
+            try {
+                const content = document.getElementById('noteContent').value;
+                if(!content) {
+                    alert('请先输入内容');
+                    return;
+                }
+
+                await db.collection('notes').add({
+                    content,
+                    category: selectedCategory,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                document.getElementById('noteContent').value = '';
+                alert('保存成功！');
+                loadNotes();
+            } catch (error) {
+                console.error('保存失败:', error);
+                alert('保存失败，请重试');
+            }
+        }
+
+        // 🎨 加载笔记（带分类）
+        function loadNotes() {
+            db.collection('notes').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
+                const notes = [];
+                snapshot.forEach(doc => {
+                    notes.push({
+                        id: doc.id,
+                        ...doc.data(),
+                        date: doc.data().timestamp.toDate().toLocaleDateString()
+                    });
+                });
+                
+                document.getElementById('noteList').innerHTML = notes.map(note => `
+                    <div class="note-item">
+                        <div class="category-tag ${note.category}">
+                            ${getCategoryLabel(note.category)}
+                        </div>
+                        <small>${note.date}</small>
+                        <p>${note.content}</p>
+                    </div>
+                `).join('');
+            });
+        }
+
+        function getCategoryLabel(category) {
+            const labels = {
+                happy: '😊 开心时刻',
+                playful: '🐶 臭狗屁',
+                love: '💖 爱宝宝'
+            };
+            return labels[category] || '其他';
+        }
+
+        // 🕒 纪念日倒计时
         function updateAnniversary() {
             const startDate = new Date('2020-10-16');
             const currentDate = new Date();
@@ -191,43 +321,11 @@
             targetDate.setFullYear(targetYear);
             
             const diffDays = Math.ceil((targetDate - currentDate) / (1000 * 3600 * 24));
-            document.getElementById('countdown').textContent = `距离${targetYear}年纪念日还有 ${diffDays} 天`;
+            document.getElementById('countdown').textContent = `距离 ${targetYear} 周年还有 ${diffDays} 天`;
         }
         setInterval(updateAnniversary, 1000);
 
-        // 修复照片上传
-        async function uploadPhoto() {
-            const files = document.getElementById('fileInput').files;
-            if(files.length === 0) return;
-
-            for(const file of files) {
-                try {
-                    const storageRef = storage.ref(`photos/${Date.now()}_${file.name}`);
-                    const uploadTask = storageRef.put(file);
-
-                    uploadTask.on('state_changed',
-                        snapshot => {
-                            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                            document.getElementById('uploadStatus').textContent = 
-                                `上传中: ${file.name} (${Math.round(progress)}%)`;
-                        },
-                        error => {
-                            console.error('上传失败:', error);
-                        },
-                        async () => {
-                            const url = await storageRef.getDownloadURL();
-                            await db.collection('photos').add({ url, timestamp: new Date() });
-                            document.getElementById('uploadStatus').textContent = `${file.name} 上传成功!`;
-                            loadPhotos();
-                        }
-                    );
-                } catch (error) {
-                    console.error('上传错误:', error);
-                }
-            }
-        }
-
-        // 加载照片
+        // 📷 加载照片
         function loadPhotos() {
             db.collection('photos').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
                 const photos = [];
@@ -246,67 +344,19 @@
         }
         loadPhotos();
 
-        // 修复恋爱笔记
-        let currentNoteId = null;
-        
-        function openEditor(noteId = null) {
-            currentNoteId = noteId;
-            document.getElementById('noteModal').style.display = 'flex';
-            if(noteId) loadNote(noteId);
+        // 页面切换
+        function showPage(pageId) {
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            
+            document.querySelector(`[onclick="showPage('${pageId}')"]`).classList.add('active');
+            document.getElementById(pageId).classList.add('active');
         }
-
-        function closeEditor() {
-            document.getElementById('noteModal').style.display = 'none';
-            document.getElementById('noteTitle').value = '';
-            document.getElementById('noteContent').value = '';
-            currentNoteId = null;
-        }
-
-        async function saveNote() {
-            const noteData = {
-                title: document.getElementById('noteTitle').value,
-                content: document.getElementById('noteContent').value,
-                date: new Date().toISOString()
-            };
-
-            try {
-                if(currentNoteId) {
-                    await db.collection('notes').doc(currentNoteId).update(noteData);
-                } else {
-                    await db.collection('notes').add(noteData);
-                }
-                closeEditor();
-                loadNotes();
-            } catch (error) {
-                console.error('保存笔记失败:', error);
-            }
-        }
-
-        function loadNotes() {
-            db.collection('notes').orderBy('date', 'desc').onSnapshot(snapshot => {
-                const notes = [];
-                snapshot.forEach(doc => {
-                    notes.push({ id: doc.id, ...doc.data() });
-                });
-                
-                document.getElementById('noteList').innerHTML = notes.map(note => `
-                    <div class="note-item" onclick="openEditor('${note.id}')">
-                        <h3>${note.title}</h3>
-                        <p>${note.content.substring(0, 50)}...</p>
-                    </div>
-                `).join('');
-            });
-        }
-        loadNotes();
 
         // 初始化
         document.addEventListener('DOMContentLoaded', () => {
             updateAnniversary();
-            document.getElementById('noteModal').addEventListener('click', event => {
-                if(event.target === document.getElementById('noteModal')) {
-                    closeEditor();
-                }
-            });
+            loadNotes();
         });
     </script>
 </body>
