@@ -3,246 +3,276 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我们的爱情日记</title>
+    <title>❤️ 我们的爱情三色堇 ❤️</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --primary: #FFB7C5;
-            --secondary: #89C4F4;
+            --pink: #FFB7C5;
+            --blue: #89C4F4;
+            --mint: #98FB98;
             --text: #4A4A4A;
         }
 
-        /* 基础样式 */
         body {
             font-family: 'Microsoft Yahei', sans-serif;
-            margin: 0;
-            background: #f8f9fa;
+            background: linear-gradient(135deg, 
+                rgba(255,183,197,0.1) 0%, 
+                rgba(137,196,244,0.1) 100%);
+            min-height: 100vh;
         }
 
-        /* 导航栏 */
-        .nav-bar {
+        /* 导航系统 */
+        .love-nav {
             display: flex;
-            background: white;
-            padding: 1rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            justify-content: center;
+            padding: 1.5rem;
+            background: rgba(255,255,255,0.95);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
         }
 
         .nav-btn {
-            padding: 0.8rem 1.5rem;
-            margin: 0 1rem;
-            border: none;
+            margin: 0 2rem;
+            padding: 1rem 2rem;
+            border-radius: 50px;
             background: none;
+            border: 2px solid var(--pink);
+            color: var(--pink);
             cursor: pointer;
             transition: all 0.3s;
         }
 
         .nav-btn.active {
-            border-bottom: 3px solid var(--primary);
+            background: var(--pink);
+            color: white;
         }
 
-        /* 界面容器 */
-        .page {
-            display: none;
-            padding: 2rem;
+        /* 首页设计 */
+        #home {
+            padding: 3rem 15%;
         }
 
-        .page.active {
-            display: block;
+        /* 纪念日倒计时牌 */
+        .countdown-clock {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(255,183,197,0.15);
+            text-align: center;
+            margin: 2rem 0;
         }
 
-        /* 首页轮播图 */
-        .carousel {
+        .countdown-number {
+            font-size: 4rem;
+            color: var(--pink);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* 动态相册轮播 */
+        .love-carousel {
             height: 400px;
-            position: relative;
+            border-radius: 20px;
             overflow: hidden;
-            border-radius: 15px;
-        }
-
-        .carousel-inner {
-            display: flex;
-            transition: transform 0.5s;
+            position: relative;
+            margin: 3rem 0;
         }
 
         .carousel-item {
-            min-width: 100%;
-            height: 400px;
+            position: absolute;
+            width: 100%;
+            height: 100%;
             background-size: cover;
             background-position: center;
+            opacity: 0;
+            transition: opacity 1s;
         }
 
-        /* 倒计时样式 */
-        .countdown-box {
-            background: white;
-            padding: 2rem;
-            border-radius: 15px;
-            margin: 2rem 0;
-            text-align: center;
+        .carousel-item.active {
+            opacity: 1;
         }
 
-        /* 笔记本界面 */
-        .notebook-container {
+        /* 照片墙优化 */
+        #gallery {
+            padding: 2rem 10%;
+            display: none;
+        }
+
+        .photo-grid {
             display: grid;
-            grid-template-columns: 250px 1fr;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 2rem;
-            height: 80vh;
+        }
+
+        .photo-card {
+            aspect-ratio: 1;
+            background-size: cover;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .photo-card:hover {
+            transform: scale(1.05) rotate(2deg);
+        }
+
+        /* 恋爱笔记本 */
+        #notebook {
+            display: none;
+            padding: 2rem 20%;
+        }
+
+        .note-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            padding: 2rem;
         }
 
         .note-list {
-            background: white;
-            padding: 1rem;
-            border-radius: 12px;
+            max-height: 60vh;
             overflow-y: auto;
         }
 
-        .note-editor {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
+        .note-item {
+            padding: 1.5rem;
+            margin: 1rem 0;
+            background: rgba(255,183,197,0.1);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .note-item:hover {
+            transform: translateX(10px);
+            background: rgba(255,183,197,0.2);
         }
     </style>
 </head>
 <body>
-    <!-- 导航栏 -->
-    <nav class="nav-bar">
-        <button class="nav-btn active" data-page="home">首页</button>
-        <button class="nav-btn" data-page="gallery">照片墙</button>
+    <!-- 导航系统 -->
+    <nav class="love-nav">
+        <button class="nav-btn active" onclick="showPage('home')">首页</button>
+        <button class="nav-btn" onclick="showPage('gallery')">照片墙</button>
+        <button class="nav-btn" onclick="showPage('notebook')">恋爱笔记</button>
     </nav>
 
     <!-- 首页 -->
-    <section id="home" class="page active">
-        <!-- 轮播图 -->
-        <div class="carousel">
-            <div class="carousel-inner" id="carouselInner"></div>
+    <section id="home">
+        <!-- 纪念日倒计时 -->
+        <div class="countdown-clock">
+            <h2>❤️ 距离我们第 <span id="year">5</span> 周年还有 ❤️</h2>
+            <div class="countdown-number" id="countdown"></div>
         </div>
 
-        <!-- 倒计时 -->
-        <div class="countdown-box">
-            <h2>距离我们第 <span id="anniversaryYear">5</span> 周年还有</h2>
-            <div id="countdown" class="display-4"></div>
+        <!-- 动态相册 -->
+        <div class="love-carousel" id="carousel">
+            <div class="carousel-item active" style="background-image: url(images/1.jpg)"></div>
+            <div class="carousel-item" style="background-image: url(images/2.jpg)"></div>
         </div>
-
-        <!-- 笔记本入口 -->
-        <button onclick="showNotebook()" class="btn-primary">打开恋爱笔记本</button>
     </section>
 
-    <!-- 照片墙 (之前版本代码) -->
-    <section id="gallery" class="page">
-        <!-- 照片墙内容 -->
+    <!-- 照片墙 -->
+    <section id="gallery">
+        <div class="photo-grid" id="photoGrid"></div>
     </section>
 
-    <!-- 笔记本界面 -->
-    <section id="notebook" class="page">
-        <div class="notebook-container">
+    <!-- 恋爱笔记本 -->
+    <section id="notebook">
+        <div class="note-container">
             <div class="note-list" id="noteList"></div>
-            <div class="note-editor">
-                <input type="text" id="noteTitle" placeholder="输入标题">
-                <textarea id="noteContent" rows="15"></textarea>
-                <button onclick="saveNote()">保存笔记</button>
-            </div>
+            <button onclick="createNewNote()" class="new-note-btn">
+                <i class="fas fa-plus"></i> 新建笔记
+            </button>
         </div>
     </section>
 
     <script>
-        // 全局状态
-        let currentPage = 'home';
-        let anniversaryYear = 5;
-        const LOVE_START = new Date('2020-10-16');
+        // 页面切换控制
+        function showPage(pageId) {
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('section').forEach(section => section.style.display = 'none');
+            
+            document.querySelector(`[onclick="showPage('${pageId}')"]`).classList.add('active');
+            document.getElementById(pageId).style.display = 'block';
+        }
 
-        // 初始化
-        initCarousel();
+        // 纪念日倒计时系统
+        const LOVE_DAY = new Date('2020-10-16');
+        function updateCountdown() {
+            const now = new Date();
+            let yearSpan = LOVE_DAY.getFullYear() + 5;
+            
+            while(new Date(LOVE_DAY.setFullYear(yearSpan)) < now) {
+                yearSpan++;
+            }
+            
+            const targetDate = new Date(LOVE_DAY);
+            targetDate.setFullYear(yearSpan);
+            const diff = targetDate - now;
+            
+            const days = Math.ceil(diff / (1000 * 3600 * 24));
+            document.getElementById('countdown').textContent = days;
+            document.getElementById('year').textContent = yearSpan - 2020;
+            
+            requestAnimationFrame(updateCountdown);
+        }
         updateCountdown();
-        loadNotes();
 
-        // 导航切换
-        document.querySelectorAll('.nav-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                currentPage = btn.dataset.page;
-                document.querySelectorAll('.page').forEach(p => 
-                    p.classList.remove('active')
-                );
-                document.getElementById(currentPage).classList.add('active');
-            });
-        });
+        // 轮播图控制
+        let currentSlide = 0;
+        setInterval(() => {
+            const slides = document.querySelectorAll('.carousel-item');
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide + 1) % slides.length;
+            slides[currentSlide].classList.add('active');
+        }, 5000);
 
-        // 轮播图初始化
-        function initCarousel() {
-            const photos = JSON.parse(localStorage.getItem('gallery') || '[]');
-            const carousel = document.getElementById('carouselInner');
+        // 照片墙初始化
+        function initGallery() {
+            const photos = ['images/1.jpg', 'images/2.jpg']; // 从GitHub加载图片
+            const grid = document.getElementById('photoGrid');
             
             photos.forEach(photo => {
-                const item = document.createElement('div');
-                item.className = 'carousel-item';
-                item.style.backgroundImage = `url(${photo})`;
-                carousel.appendChild(item);
+                const card = document.createElement('div');
+                card.className = 'photo-card';
+                card.style.backgroundImage = `url(${photo})`;
+                grid.appendChild(card);
             });
-
-            // 自动轮播
-            let current = 0;
-            setInterval(() => {
-                current = (current + 1) % photos.length;
-                carousel.style.transform = `translateX(-${current * 100}%)`;
-            }, 5000);
         }
+        initGallery();
 
-        // 倒计时逻辑
-        function updateCountdown() {
-            const targetYear = LOVE_START.getFullYear() + anniversaryYear;
-            let targetDate = new Date(LOVE_START);
-            targetDate.setFullYear(targetYear);
-
-            // 如果今年纪念日已过，指向下一年
-            if(new Date() > targetDate) {
-                anniversaryYear++;
-                targetDate.setFullYear(targetYear + 1);
-            }
-
-            const diff = targetDate - new Date();
-            const days = Math.ceil(diff / (1000 * 3600 * 24));
-
-            document.getElementById('countdown').textContent = `${days} 天`;
-            document.getElementById('anniversaryYear').textContent = anniversaryYear;
-
-            setTimeout(updateCountdown, 1000);
-        }
-
-        // 笔记本功能
-        function showNotebook() {
-            currentPage = 'notebook';
-            document.getElementById('notebook').classList.add('active');
-        }
-
-        function saveNote() {
-            const notes = JSON.parse(localStorage.getItem('notes') || '[]');
-            const newNote = {
+        // 恋爱笔记本系统
+        let notes = JSON.parse(localStorage.getItem('loveNotes') || '[]');
+        
+        function createNewNote() {
+            const note = {
                 id: Date.now(),
-                title: document.getElementById('noteTitle').value,
-                content: document.getElementById('noteContent').value,
-                date: new Date().toISOString()
+                title: '新的恋爱笔记',
+                content: '写下我们的甜蜜时刻...',
+                date: new Date().toLocaleDateString()
             };
             
-            notes.push(newNote);
-            localStorage.setItem('notes', JSON.stringify(notes));
-            loadNotes();
+            notes.push(note);
+            localStorage.setItem('loveNotes', JSON.stringify(notes));
+            renderNotes();
         }
 
-        function loadNotes() {
-            const notes = JSON.parse(localStorage.getItem('notes') || '[]');
+        function renderNotes() {
             const list = document.getElementById('noteList');
-            
             list.innerHTML = notes.map(note => `
-                <div class="note-item" onclick="showNoteDetail(${note.id})">
+                <div class="note-item" onclick="openNote(${note.id})">
                     <h4>${note.title}</h4>
-                    <small>${new Date(note.date).toLocaleDateString()}</small>
+                    <small>${note.date}</small>
                 </div>
             `).join('');
         }
 
-        function showNoteDetail(id) {
-            const notes = JSON.parse(localStorage.getItem('notes') || '[]');
+        function openNote(id) {
             const note = notes.find(n => n.id === id);
-            
-            document.getElementById('noteTitle').value = note.title;
-            document.getElementById('noteContent').value = note.content;
+            // 打开笔记编辑界面
+            console.log('打开笔记:', note);
         }
+
+        renderNotes();
     </script>
 </body>
 </html>
