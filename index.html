@@ -57,25 +57,15 @@
 
         .page.active {
             display: block;
+            animation: fadeIn 0.3s ease;
         }
 
-        /* 首页优化 */
-        .hero-section {
-            text-align: center;
-            padding: 3rem 0;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .countdown-box {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border-radius: 20px;
-            padding: 2rem;
-            margin: 2rem auto;
-            max-width: 600px;
-            color: white;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-
-        /* 照片墙修复 */
+        /* 照片墙样式 */
         .gallery-container {
             max-width: 1200px;
             margin: 0 auto;
@@ -97,7 +87,7 @@
             transition: transform 0.3s;
         }
 
-        /* 上传组件修复 */
+        /* 上传组件 */
         .upload-section {
             background: white;
             border-radius: 20px;
@@ -107,7 +97,7 @@
             text-align: center;
         }
 
-        /* 笔记系统优化 */
+        /* 笔记系统 */
         .note-editor {
             background: white;
             border-radius: 20px;
@@ -117,19 +107,57 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
 
-        .category-tag {
-            display: inline-block;
-            padding: 0.3rem 1rem;
-            border-radius: 15px;
-            font-size: 0.9rem;
-            margin-right: 0.5rem;
+        .category-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
         }
 
-        .happy { background: var(--happy); }
-        .playful { background: var(--playful); color: white; }
-        .love { background: var(--love); color: white; }
+        .category-btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
 
-        /* 笔记详情弹窗 */
+        .category-btn.active {
+            transform: scale(1.05);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 1rem;
+            border: 2px solid var(--primary);
+            border-radius: 15px;
+            margin: 1rem 0;
+            resize: vertical;
+            font-size: 1rem;
+        }
+
+        /* 笔记列表 */
+        .note-list {
+            margin-top: 2rem;
+        }
+
+        .note-item {
+            background: white;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .note-item:hover {
+            transform: translateY(-3px);
+        }
+
+        /* 弹窗样式 */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -163,13 +191,11 @@
 
     <!-- 首页 -->
     <section id="home" class="page active">
-        <div class="hero-section">
-            <div class="countdown-box">
-                <h2>❤️ 我们的恋爱纪念日 ❤️</h2>
-                <div id="countdown">正在计算...</div>
-            </div>
-            <div class="photo-grid" id="homePhotos"></div>
+        <div class="countdown-box">
+            <h2>❤️ 我们的恋爱纪念日 ❤️</h2>
+            <div id="countdown">正在计算...</div>
         </div>
+        <div class="photo-grid" id="homePhotos"></div>
     </section>
 
     <!-- 照片墙 -->
@@ -179,7 +205,7 @@
                 <input type="file" id="fileInput" multiple accept="image/*" hidden>
                 <label for="fileInput" class="nav-btn">📷 选择照片</label>
                 <button id="uploadButton" class="nav-btn">🚀 开始上传</button>
-                <div id="uploadStatus" class="upload-status"></div>
+                <div id="uploadStatus"></div>
             </div>
             <div class="photo-grid" id="photoGrid"></div>
         </div>
@@ -189,11 +215,11 @@
     <section id="notes" class="page">
         <div class="note-editor">
             <div class="category-group">
-                <button class="nav-btn happy active" data-category="happy">😊 开心时刻</button>
-                <button class="nav-btn playful" data-category="playful">🐶 臭狗屁</button>
-                <button class="nav-btn love" data-category="love">💖 爱宝宝</button>
+                <button class="category-btn happy active" data-category="happy">😊 开心时刻</button>
+                <button class="category-btn playful" data-category="playful">🐶 臭狗屁</button>
+                <button class="category-btn love" data-category="love">💖 爱宝宝</button>
             </div>
-            <textarea id="noteContent" placeholder="记录我们的甜蜜故事..." rows="6"></textarea>
+            <textarea id="noteContent" placeholder="写下我们的甜蜜故事..."></textarea>
             <button id="saveNote" class="nav-btn">💾 保存笔记</button>
         </div>
         <div class="note-list" id="noteList"></div>
@@ -204,7 +230,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
 
     <script>
-        // 🔥 配置Firebase（需替换为您的配置）
+        // 🔥 Firebase配置（需替换为您的配置）
         const firebaseConfig = {
             apiKey: "YOUR_API_KEY",
             authDomain: "YOUR_PROJECT.firebaseapp.com",
@@ -219,10 +245,26 @@
         const db = firebase.firestore();
         const storage = firebase.storage();
 
-        // 🚀 可靠的照片上传功能
+        // 🚀 页面切换功能（修复版）
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelector('.nav-bar').addEventListener('click', (e) => {
+                if (e.target.matches('.nav-btn')) {
+                    // 移除所有激活状态
+                    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+                    document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+                    
+                    // 设置新状态
+                    const pageId = e.target.dataset.page;
+                    e.target.classList.add('active');
+                    document.getElementById(pageId).classList.add('active');
+                }
+            });
+        });
+
+        // 📸 可靠的照片上传功能
         document.getElementById('uploadButton').addEventListener('click', async () => {
             const files = document.getElementById('fileInput').files;
-            if (!files.length) return alert('请选择要上传的照片');
+            if (files.length === 0) return alert('请选择照片');
 
             try {
                 for (const file of files) {
@@ -235,7 +277,7 @@
                             snapshot => {
                                 const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
                                 document.getElementById('uploadStatus').textContent = 
-                                    `上传中: ${Math.round(progress)}%`;
+                                    `上传进度: ${Math.round(progress)}%`;
                             },
                             reject,
                             resolve
@@ -259,9 +301,9 @@
 
         // 💌 可靠的笔记系统
         let selectedCategory = 'happy';
-        document.querySelectorAll('[data-category]').forEach(btn => {
+        document.querySelectorAll('.category-btn').forEach(btn => {
             btn.addEventListener('click', function() {
-                document.querySelectorAll('[data-category]').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
                 selectedCategory = this.dataset.category;
             });
@@ -272,25 +314,25 @@
             if (!content) return alert('请输入内容');
 
             try {
-                const docRef = await db.collection('notes').add({
+                await db.collection('notes').add({
                     content,
                     category: selectedCategory,
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 document.getElementById('noteContent').value = '';
                 loadNotes();
-                alert(`笔记已保存！ID: ${docRef.id}`);
+                alert('保存成功！');
             } catch (error) {
                 console.error('保存失败:', error);
                 alert('保存失败，请检查网络');
             }
         });
 
-        // 📖 加载数据功能
+        // 📖 数据加载功能
         function loadPhotos() {
             db.collection('photos').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
                 const photos = snapshot.docs.map(doc => doc.data().url);
-                const render = containerId => {
+                const render = (containerId) => {
                     document.getElementById(containerId).innerHTML = photos
                         .map(url => `<div class="photo-card" style="background-image:url('${url}')"></div>`)
                         .join('');
@@ -314,17 +356,19 @@
                             ${getCategoryLabel(note.category)}
                         </div>
                         <small>${note.date}</small>
-                        <p>${note.content.substring(0, 80)}</p>
+                        <p>${note.content}</p>
                     </div>
                 `).join('');
 
-                document.querySelectorAll('.note-item').forEach(item => {
-                    item.addEventListener('click', () => showNoteDetail(item.dataset.id));
+                // 绑定点击事件（修复版）
+                document.getElementById('noteList').addEventListener('click', (e) => {
+                    const noteItem = e.target.closest('.note-item');
+                    if (noteItem) showNoteDetail(noteItem.dataset.id);
                 });
             });
         }
 
-        // 🖼️ 笔记详情弹窗
+        // 🖼️ 笔记详情弹窗（修复版）
         async function showNoteDetail(noteId) {
             try {
                 const doc = await db.collection('notes').doc(noteId).get();
@@ -348,29 +392,30 @@
 
         // 🛠️ 工具函数
         function getCategoryLabel(category) {
-            const labels = {
-                happy: '开心时刻 😊',
-                playful: '臭狗屁 🐶',
-                love: '爱宝宝 💖'
-            };
-            return labels[category] || '其他';
+            return {
+                happy: '😊 开心时刻',
+                playful: '🐶 臭狗屁',
+                love: '💖 爱宝宝'
+            }[category];
         }
 
         // ⏰ 纪念日倒计时
         function updateAnniversary() {
-            const start = new Date('2020-10-16');
-            const now = new Date();
-            const nextYear = start.getFullYear() + Math.ceil((now - start) / 31536000000);
-            const target = new Date(start.setFullYear(nextYear));
-            const diffDays = Math.ceil((target - now) / 86400000);
+            const startDate = new Date('2020-10-16');
+            const currentDate = new Date();
+            const nextYear = startDate.getFullYear() + Math.ceil((currentDate - startDate) / 31536000000);
+            const targetDate = new Date(startDate.setFullYear(nextYear));
+            const diffDays = Math.ceil((targetDate - currentDate) / 86400000);
             document.getElementById('countdown').textContent = `${diffDays} 天`;
         }
         setInterval(updateAnniversary, 1000);
-        updateAnniversary();
 
         // 🚩 初始化加载
-        loadPhotos();
-        loadNotes();
+        document.addEventListener('DOMContentLoaded', () => {
+            updateAnniversary();
+            loadPhotos();
+            loadNotes();
+        });
     </script>
 </body>
 </html>
