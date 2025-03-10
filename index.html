@@ -440,18 +440,266 @@ setInterval(updateAnniversary, 1000);
 updateAnniversary();
 </script>
 
-    <!-- 照片墙 -->
-    <section id="gallery" class="page">
-        <div class="gallery-container">
-            <div class="upload-section">
-                <input type="file" id="fileInput" multiple accept="image/*" hidden>
-                <label for="fileInput" class="nav-btn">📷 选择照片</label>
-                <button id="uploadButton" class="nav-btn">🚀 开始上传</button>
-                <div id="uploadStatus"></div>
+   <!-- 照片墙 -->
+<section id="gallery" class="page">
+    <div class="gallery-container">
+        <!-- 上传面板 -->
+        <div class="upload-panel">
+            <div class="upload-header">
+                <h2><i class="fas fa-cloud-upload-alt"></i> 上传甜蜜时刻</h2>
+                <div class="upload-tips">支持JPEG/PNG格式，单文件≤10MB</div>
             </div>
-            <div class="photo-grid" id="photoGrid"></div>
+            
+            <div class="upload-controls">
+                <input type="file" id="fileInput" multiple accept="image/*" hidden>
+                <label for="fileInput" class="upload-btn">
+                    <i class="fas fa-folder-open"></i> 选择文件
+                    <span class="file-counter">已选0张</span>
+                </label>
+                <button id="uploadButton" class="upload-btn primary">
+                    <i class="fas fa-rocket"></i> 开始上传
+                    <div class="upload-progress"></div>
+                </button>
+            </div>
+
+            <div id="uploadStatus" class="status-message"></div>
         </div>
-    </section>
+
+        <!-- 照片瀑布流 -->
+        <div class="photo-waterfall" id="photoGrid">
+            <div class="waterfall-sizer"></div>
+            <!-- 照片卡片由JS动态插入 -->
+        </div>
+        
+        <!-- 加载更多 -->
+        <div class="load-more">
+            <button class="load-btn" id="loadMore">
+                <i class="fas fa-sync"></i> 加载更多回忆
+            </button>
+        </div>
+    </div>
+</section>
+
+<style>
+/* 照片墙专属样式 */
+#gallery {
+    background: #f8f9fa;
+    padding: 2rem 5%;
+}
+
+/* 上传面板 */
+.upload-panel {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    margin-bottom: 2rem;
+    padding: 2rem;
+}
+
+.upload-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.upload-header h2 {
+    color: #FF758F;
+    margin: 0 0 0.5rem;
+    font-size: 1.8rem;
+}
+
+.upload-header .upload-tips {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* 上传控件 */
+.upload-controls {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin: 2rem 0;
+}
+
+.upload-btn {
+    position: relative;
+    padding: 1rem 2rem;
+    border: 2px solid #FF758F;
+    border-radius: 30px;
+    background: none;
+    color: #FF758F;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.upload-btn:hover {
+    background: rgba(255,117,143,0.1);
+    transform: translateY(-2px);
+}
+
+.upload-btn.primary {
+    background: linear-gradient(135deg, #FF758F, #FF9F6F);
+    color: white;
+    border-color: transparent;
+}
+
+.upload-btn.primary:hover {
+    opacity: 0.9;
+    box-shadow: 0 5px 15px rgba(255,117,143,0.3);
+}
+
+.file-counter {
+    background: rgba(255,117,143,0.2);
+    padding: 0.2rem 0.6rem;
+    border-radius: 15px;
+    font-size: 0.9rem;
+}
+
+.upload-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: rgba(255,255,255,0.3);
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+/* 瀑布流布局 */
+.photo-waterfall {
+    column-count: 4;
+    column-gap: 1rem;
+    margin: 1rem 0;
+}
+
+.waterfall-sizer {
+    width: 100%;
+    display: none;
+}
+
+.photo-card {
+    break-inside: avoid;
+    margin-bottom: 1rem;
+    border-radius: 12px;
+    overflow: hidden;
+    background: white;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+    position: relative;
+}
+
+.photo-card:hover {
+    transform: translateY(-5px);
+}
+
+.photo-card::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(180deg, 
+        rgba(0,0,0,0) 60%, 
+        rgba(0,0,0,0.3) 100%);
+}
+
+.photo-card img {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+/* 加载更多按钮 */
+.load-more {
+    text-align: center;
+    margin: 3rem 0;
+}
+
+.load-btn {
+    padding: 1rem 2.5rem;
+    border: none;
+    background: #FF758F;
+    color: white;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.load-btn:hover {
+    background: #FF687F;
+    box-shadow: 0 5px 15px rgba(255,117,143,0.3);
+}
+
+/* 状态提示 */
+.status-message {
+    text-align: center;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    transition: all 0.3s ease;
+}
+
+.status-message.uploading {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.status-message.success {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.status-message.error {
+    background: #ffebee;
+    color: #c62828;
+}
+
+@media (max-width: 768px) {
+    .photo-waterfall {
+        column-count: 2;
+    }
+    
+    .upload-controls {
+        flex-direction: column;
+    }
+    
+    .upload-btn {
+        justify-content: center;
+    }
+}
+</style>
+
+<script>
+// 文件选择计数
+document.getElementById('fileInput').addEventListener('change', function(e) {
+    const count = e.target.files.length;
+    document.querySelector('.file-counter').textContent = `已选${count}张`;
+});
+
+// 瀑布流布局初始化
+function initWaterfall() {
+    new Masonry('#photoGrid', {
+        itemSelector: '.photo-card',
+        columnWidth: '.waterfall-sizer',
+        percentPosition: true,
+        transitionDuration: '0.3s'
+    });
+}
+
+// 图片加载完成后重新布局
+function refreshWaterfall() {
+    imagesLoaded('#photoGrid', function() {
+        initWaterfall();
+    });
+}
+</script>
 
     <!-- 恋爱笔记 -->
     <section id="notes" class="page">
