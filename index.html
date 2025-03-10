@@ -3,26 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>❤️ 我们的爱情三色堇 ❤️</title>
+    <title>❤️ 我们的爱情宇宙 ❤️</title>
     <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
             --pink: #FFB7C5;
             --blue: #89C4F4;
-            --mint: #98FB98;
             --text: #4A4A4A;
         }
 
         body {
             font-family: 'Microsoft Yahei', sans-serif;
-            background: linear-gradient(135deg, 
-                rgba(255,183,197,0.1) 0%, 
-                rgba(137,196,244,0.1) 100%);
-            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #fff5f5 0%, #f0f8ff 100%);
         }
 
-        /* 导航系统 */
-        .love-nav {
+        .nav-bar {
             display: flex;
             justify-content: center;
             padding: 1.5rem;
@@ -46,60 +42,35 @@
             color: white;
         }
 
-        /* 首页设计 */
-        #home {
+        .page {
+            display: none;
             padding: 3rem 15%;
         }
 
-        /* 纪念日倒计时牌 */
+        .page.active {
+            display: block;
+        }
+
         .countdown-clock {
-            background: white;
+            background: rgba(255,255,255,0.9);
             padding: 3rem;
             border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(255,183,197,0.15);
             text-align: center;
             margin: 2rem 0;
+            box-shadow: 0 10px 30px rgba(255,183,197,0.15);
         }
 
         .countdown-number {
             font-size: 4rem;
             color: var(--pink);
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-        }
-
-        /* 动态相册轮播 */
-        .love-carousel {
-            height: 400px;
-            border-radius: 20px;
-            overflow: hidden;
-            position: relative;
-            margin: 3rem 0;
-        }
-
-        .carousel-item {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background-size: cover;
-            background-position: center;
-            opacity: 0;
-            transition: opacity 1s;
-        }
-
-        .carousel-item.active {
-            opacity: 1;
-        }
-
-        /* 照片墙优化 */
-        #gallery {
-            padding: 2rem 10%;
-            display: none;
+            margin: 1rem 0;
         }
 
         .photo-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: 2rem;
+            margin-top: 2rem;
         }
 
         .photo-card {
@@ -110,169 +81,233 @@
             transition: transform 0.3s;
         }
 
-        .photo-card:hover {
-            transform: scale(1.05) rotate(2deg);
-        }
-
-        /* 恋爱笔记本 */
-        #notebook {
-            display: none;
-            padding: 2rem 20%;
-        }
-
-        .note-container {
+        .upload-section {
             background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
             padding: 2rem;
-        }
-
-        .note-list {
-            max-height: 60vh;
-            overflow-y: auto;
-        }
-
-        .note-item {
-            padding: 1.5rem;
-            margin: 1rem 0;
-            background: rgba(255,183,197,0.1);
             border-radius: 15px;
-            cursor: pointer;
-            transition: all 0.3s;
+            text-align: center;
+            margin: 2rem 0;
         }
 
-        .note-item:hover {
-            transform: translateX(10px);
-            background: rgba(255,183,197,0.2);
+        .note-editor {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin-top: 2rem;
+        }
+
+        #editorModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            width: 80%;
+            max-width: 600px;
         }
     </style>
 </head>
 <body>
-    <!-- 导航系统 -->
-    <nav class="love-nav">
+    <nav class="nav-bar">
         <button class="nav-btn active" onclick="showPage('home')">首页</button>
         <button class="nav-btn" onclick="showPage('gallery')">照片墙</button>
-        <button class="nav-btn" onclick="showPage('notebook')">恋爱笔记</button>
+        <button class="nav-btn" onclick="showPage('notes')">恋爱笔记</button>
     </nav>
 
     <!-- 首页 -->
-    <section id="home">
-        <!-- 纪念日倒计时 -->
+    <section id="home" class="page active">
         <div class="countdown-clock">
-            <h2>❤️ 距离我们第 <span id="year">5</span> 周年还有 ❤️</h2>
+            <h2>❤️ 距离我们第 <span id="targetYear">5</span> 周年还有 ❤️</h2>
             <div class="countdown-number" id="countdown"></div>
         </div>
-
-        <!-- 动态相册 -->
-        <div class="love-carousel" id="carousel">
-            <div class="carousel-item active" style="background-image: url(images/1.jpg)"></div>
-            <div class="carousel-item" style="background-image: url(images/2.jpg)"></div>
-        </div>
+        <div class="photo-grid" id="carousel"></div>
     </section>
 
     <!-- 照片墙 -->
-    <section id="gallery">
+    <section id="gallery" class="page">
+        <div class="upload-section">
+            <input type="file" id="fileInput" multiple accept="image/*">
+            <button onclick="uploadPhoto()" class="nav-btn">上传照片</button>
+        </div>
         <div class="photo-grid" id="photoGrid"></div>
     </section>
 
-    <!-- 恋爱笔记本 -->
-    <section id="notebook">
-        <div class="note-container">
-            <div class="note-list" id="noteList"></div>
-            <button onclick="createNewNote()" class="new-note-btn">
-                <i class="fas fa-plus"></i> 新建笔记
-            </button>
+    <!-- 恋爱笔记 -->
+    <section id="notes" class="page">
+        <div class="note-editor">
+            <button onclick="createNote()" class="nav-btn">新建笔记</button>
+            <div class="photo-grid" id="noteList"></div>
+        </div>
+        <div id="editorModal">
+            <div class="modal-content">
+                <input type="text" id="noteTitle" placeholder="笔记标题">
+                <textarea id="noteContent" rows="10" placeholder="记录我们的甜蜜时刻..."></textarea>
+                <button onclick="saveNote()" class="nav-btn">保存笔记</button>
+            </div>
         </div>
     </section>
 
+    <!-- Firebase 集成 -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
+
     <script>
-        // 页面切换控制
-        function showPage(pageId) {
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('section').forEach(section => section.style.display = 'none');
-            
-            document.querySelector(`[onclick="showPage('${pageId}')"]`).classList.add('active');
-            document.getElementById(pageId).style.display = 'block';
-        }
+        // 🔥 Firebase 配置（需要替换为你自己的配置）
+        const firebaseConfig = {
+            apiKey: "AIzaSyABCDEFGHIJKLMNOPQRSTUVWXYZ012345678",
+            authDomain: "your-project.firebaseapp.com",
+            projectId: "your-project",
+            storageBucket: "your-project.appspot.com",
+            messagingSenderId: "123456789012",
+            appId: "1:123456789012:web:abcdefghijklmnopqrstuvw"
+        };
 
-        // 纪念日倒计时系统
-        const LOVE_DAY = new Date('2020-10-16');
-        function updateCountdown() {
-            const now = new Date();
-            let yearSpan = LOVE_DAY.getFullYear() + 5;
-            
-            while(new Date(LOVE_DAY.setFullYear(yearSpan)) < now) {
-                yearSpan++;
-            }
-            
-            const targetDate = new Date(LOVE_DAY);
-            targetDate.setFullYear(yearSpan);
-            const diff = targetDate - now;
-            
-            const days = Math.ceil(diff / (1000 * 3600 * 24));
-            document.getElementById('countdown').textContent = days;
-            document.getElementById('year').textContent = yearSpan - 2020;
-            
-            requestAnimationFrame(updateCountdown);
-        }
-        updateCountdown();
+        // 初始化 Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const storage = firebase.storage();
 
-        // 轮播图控制
-        let currentSlide = 0;
-        setInterval(() => {
-            const slides = document.querySelectorAll('.carousel-item');
-            slides[currentSlide].classList.remove('active');
-            currentSlide = (currentSlide + 1) % slides.length;
-            slides[currentSlide].classList.add('active');
-        }, 5000);
-
-        // 照片墙初始化
-        function initGallery() {
-            const photos = ['images/1.jpg', 'images/2.jpg']; // 从GitHub加载图片
-            const grid = document.getElementById('photoGrid');
-            
-            photos.forEach(photo => {
-                const card = document.createElement('div');
-                card.className = 'photo-card';
-                card.style.backgroundImage = `url(${photo})`;
-                grid.appendChild(card);
-            });
-        }
-        initGallery();
-
-        // 恋爱笔记本系统
-        let notes = JSON.parse(localStorage.getItem('loveNotes') || '[]');
+        // 💌 实时数据监听器
+        let currentNoteId = null;
         
-        function createNewNote() {
-            const note = {
-                id: Date.now(),
-                title: '新的恋爱笔记',
-                content: '写下我们的甜蜜时刻...',
-                date: new Date().toLocaleDateString()
-            };
+        // 🎯 智能纪念日系统
+        function updateAnniversary() {
+            const startYear = 2020;
+            const currentYear = new Date().getFullYear();
+            let targetYear = startYear + Math.ceil((currentYear - startYear + 1)/5)*5;
             
-            notes.push(note);
-            localStorage.setItem('loveNotes', JSON.stringify(notes));
-            renderNotes();
+            const targetDate = new Date(`10/16/${targetYear}`);
+            const diffDays = Math.ceil((targetDate - new Date())/(1000*3600*24));
+            
+            document.getElementById('countdown').textContent = `${diffDays} 天`;
+            document.getElementById('targetYear').textContent = targetYear - 2020;
+            
+            // 每年自动更新
+            setTimeout(updateAnniversary, 1000*60*60);
+        }
+        updateAnniversary();
+
+        // 📸 照片墙系统
+        async function uploadPhoto() {
+            const file = document.getElementById('fileInput').files[0];
+            if (!file) return;
+
+            const storageRef = storage.ref(`photos/${Date.now()}_${file.name}`);
+            const uploadTask = storageRef.put(file);
+
+            uploadTask.on('state_changed',
+                (snapshot) => {
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    console.log(`上传进度: ${Math.round(progress)}%`);
+                },
+                (error) => {
+                    console.error('上传失败:', error);
+                },
+                async () => {
+                    const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+                    await db.collection('photos').add({
+                        url: downloadURL,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+            );
         }
 
-        function renderNotes() {
-            const list = document.getElementById('noteList');
-            list.innerHTML = notes.map(note => `
-                <div class="note-item" onclick="openNote(${note.id})">
-                    <h4>${note.title}</h4>
-                    <small>${note.date}</small>
+        // 实时照片监听
+        db.collection('photos').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
+            const photos = [];
+            snapshot.forEach(doc => photos.push(doc.data().url));
+            renderPhotos(photos);
+        });
+
+        function renderPhotos(photos) {
+            const render = (containerId) => {
+                const container = document.getElementById(containerId);
+                container.innerHTML = photos.map(url => `
+                    <div class="photo-card" style="background-image: url('${url}')"></div>
+                `).join('');
+            }
+            render('photoGrid');
+            render('carousel');
+        }
+
+        // 📒 恋爱笔记系统
+        function createNote() {
+            currentNoteId = null;
+            document.getElementById('noteTitle').value = '';
+            document.getElementById('noteContent').value = '';
+            document.getElementById('editorModal').style.display = 'flex';
+        }
+
+        async function saveNote() {
+            const noteData = {
+                title: document.getElementById('noteTitle').value,
+                content: document.getElementById('noteContent').value,
+                updated: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            if (currentNoteId) {
+                await db.collection('notes').doc(currentNoteId).update(noteData);
+            } else {
+                await db.collection('notes').add({
+                    ...noteData,
+                    created: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
+            document.getElementById('editorModal').style.display = 'none';
+        }
+
+        // 实时笔记监听
+        db.collection('notes').orderBy('created', 'desc').onSnapshot(snapshot => {
+            const notes = [];
+            snapshot.forEach(doc => {
+                notes.push({
+                    id: doc.id,
+                    ...doc.data()
+                });
+            });
+            renderNotes(notes);
+        });
+
+        function renderNotes(notes) {
+            const container = document.getElementById('noteList');
+            container.innerHTML = notes.map(note => `
+                <div class="photo-card" onclick="openNote('${note.id}')" 
+                     style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), 
+                            url('https://picsum.photos/300/300?random=${note.id}')">
+                    <h3>${note.title}</h3>
+                    <p>${note.content.substring(0, 50)}...</p>
                 </div>
             `).join('');
         }
 
-        function openNote(id) {
-            const note = notes.find(n => n.id === id);
-            // 打开笔记编辑界面
-            console.log('打开笔记:', note);
+        async function openNote(id) {
+            currentNoteId = id;
+            const doc = await db.collection('notes').doc(id).get();
+            document.getElementById('noteTitle').value = doc.data().title;
+            document.getElementById('noteContent').value = doc.data().content;
+            document.getElementById('editorModal').style.display = 'flex';
         }
 
-        renderNotes();
+        // 🖥️ 页面切换
+        function showPage(pageId) {
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            
+            document.querySelector(`[onclick="showPage('${pageId}')"]`).classList.add('active');
+            document.getElementById(pageId).classList.add('active');
+        }
     </script>
 </body>
 </html>
