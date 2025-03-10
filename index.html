@@ -17,8 +17,10 @@
             font-family: 'Microsoft Yahei', sans-serif;
             background: var(--bg);
             margin: 0;
+            min-height: 100vh;
         }
 
+        /* 导航栏 */
         .nav-bar {
             display: flex;
             justify-content: center;
@@ -46,20 +48,16 @@
             color: white;
         }
 
+        /* 页面容器 */
         .page {
             display: none;
             padding: 2rem 10%;
         }
-
         .page.active {
             display: block;
         }
 
-        /* 首页样式 */
-        #home {
-            text-align: center;
-        }
-
+        /* 倒计时模块 */
         .countdown-box {
             background: white;
             border-radius: 20px;
@@ -67,17 +65,10 @@
             margin: 2rem auto;
             max-width: 600px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-
-        /* 照片墙样式 */
-        #gallery .upload-section {
-            background: white;
-            border-radius: 20px;
-            padding: 2rem;
-            margin: 2rem auto;
             text-align: center;
         }
 
+        /* 照片墙样式 */
         .photo-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -90,9 +81,33 @@
             background-size: cover;
             border-radius: 15px;
             box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        .photo-card:hover {
+            transform: scale(1.03);
         }
 
-        /* 恋爱笔记样式 */
+        /* 上传模块 */
+        .upload-section {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem auto;
+            text-align: center;
+        }
+        .upload-btn {
+            background: var(--primary);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+        .upload-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* 笔记编辑器 */
         .note-modal {
             display: none;
             position: fixed;
@@ -101,25 +116,42 @@
             width: 100%;
             height: 100%;
             background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
             justify-content: center;
             align-items: center;
         }
-
         .note-editor {
             background: white;
             width: 90%;
             max-width: 600px;
-            padding: 2rem;
             border-radius: 20px;
+            padding: 2rem;
             position: relative;
+            animation: modalIn 0.3s ease-out;
+        }
+        @keyframes modalIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 
-        .close-btn {
-            position: absolute;
-            right: 1.5rem;
-            top: 1.5rem;
+        /* 笔记详情弹窗 */
+        .note-detail {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .note-title {
             font-size: 1.5rem;
-            cursor: pointer;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+        .note-content {
+            line-height: 1.6;
+            white-space: pre-wrap;
         }
     </style>
 </head>
@@ -143,7 +175,9 @@
     <section id="gallery" class="page">
         <div class="upload-section">
             <input type="file" id="fileInput" multiple accept="image/*" hidden>
-            <label for="fileInput" class="nav-btn">选择照片</label>
+            <label for="fileInput" class="upload-btn">
+                <i class="fas fa-cloud-upload-alt"></i> 选择照片
+            </label>
             <button onclick="uploadPhoto()" class="nav-btn">开始上传</button>
             <div id="uploadStatus"></div>
         </div>
@@ -153,20 +187,30 @@
     <!-- 恋爱笔记 -->
     <section id="notes" class="page">
         <button onclick="openEditor()" class="nav-btn">新建笔记</button>
-        <div id="noteList"></div>
+        <div class="photo-grid" id="noteList"></div>
     </section>
 
     <!-- 笔记编辑器 -->
-    <div id="noteModal" class="note-modal">
+    <div id="editorModal" class="note-modal">
         <div class="note-editor">
             <span class="close-btn" onclick="closeEditor()">&times;</span>
-            <input type="text" id="noteTitle" placeholder="笔记标题">
-            <textarea id="noteContent" rows="10" placeholder="记录甜蜜时刻..."></textarea>
-            <button onclick="saveNote()" class="nav-btn">保存笔记</button>
+            <h3>记录我们的故事</h3>
+            <input type="text" id="noteTitle" placeholder="给笔记起个甜蜜的名字...">
+            <textarea id="noteContent" placeholder="在这里写下我们的点点滴滴..." rows="10"></textarea>
+            <button onclick="saveNote()" class="nav-btn">保存回忆</button>
         </div>
     </div>
 
-    <!-- Firebase 集成 -->
+    <!-- 笔记详情弹窗 -->
+    <div id="detailModal" class="note-modal">
+        <div class="note-detail">
+            <span class="close-btn" onclick="closeDetail()">&times;</span>
+            <h2 class="note-title" id="detailTitle"></h2>
+            <pre class="note-content" id="detailContent"></pre>
+        </div>
+    </div>
+
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
@@ -187,7 +231,127 @@
         const db = firebase.firestore();
         const storage = firebase.storage();
 
-        // 页面切换功能
+        // 🎯 修复上传功能
+        async function uploadPhoto() {
+            const files = document.getElementById('fileInput').files;
+            if(files.length === 0) {
+                alert('请先选择要上传的照片！');
+                return;
+            }
+
+            for(const file of files) {
+                try {
+                    const storageRef = storage.ref(`photos/${Date.now()}_${file.name}`);
+                    const uploadTask = storageRef.put(file);
+
+                    // 显示上传状态
+                    document.getElementById('uploadStatus').textContent = 
+                        `正在上传 ${file.name}...`;
+
+                    await uploadTask;
+                    const downloadURL = await storageRef.getDownloadURL();
+                    
+                    // 保存到数据库
+                    await db.collection('photos').add({
+                        url: downloadURL,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    
+                    document.getElementById('uploadStatus').textContent = 
+                        `${file.name} 上传成功！`;
+                    setTimeout(() => document.getElementById('uploadStatus').textContent = '', 3000);
+                    
+                } catch (error) {
+                    console.error('上传失败:', error);
+                    alert(`上传失败: ${error.message}`);
+                }
+            }
+            loadPhotos();
+        }
+
+        // 📒 优化笔记系统
+        let currentNoteId = null;
+
+        // 打开笔记编辑器
+        function openEditor(noteId = null) {
+            currentNoteId = noteId;
+            const editor = document.getElementById('editorModal');
+            
+            if(noteId) {
+                db.collection('notes').doc(noteId).get().then(doc => {
+                    document.getElementById('noteTitle').value = doc.data().title;
+                    document.getElementById('noteContent').value = doc.data().content;
+                    editor.style.display = 'flex';
+                });
+            } else {
+                document.getElementById('noteTitle').value = '';
+                document.getElementById('noteContent').value = '';
+                editor.style.display = 'flex';
+            }
+        }
+
+        // 保存笔记
+        async function saveNote() {
+            const noteData = {
+                title: document.getElementById('noteTitle').value,
+                content: document.getElementById('noteContent').value,
+                updated: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            try {
+                if(currentNoteId) {
+                    await db.collection('notes').doc(currentNoteId).update(noteData);
+                } else {
+                    await db.collection('notes').add({
+                        ...noteData,
+                        created: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+                closeEditor();
+                loadNotes();
+            } catch (error) {
+                alert('保存失败，请稍后重试');
+                console.error('保存错误:', error);
+            }
+        }
+
+        // 查看笔记详情
+        function viewNote(noteId) {
+            db.collection('notes').doc(noteId).get().then(doc => {
+                document.getElementById('detailTitle').textContent = doc.data().title;
+                document.getElementById('detailContent').textContent = doc.data().content;
+                document.getElementById('detailModal').style.display = 'flex';
+            });
+        }
+
+        // 加载笔记列表
+        function loadNotes() {
+            db.collection('notes').orderBy('created', 'desc').onSnapshot(snapshot => {
+                const notes = [];
+                snapshot.forEach(doc => {
+                    notes.push({ id: doc.id, ...doc.data() });
+                });
+                
+                document.getElementById('noteList').innerHTML = notes.map(note => `
+                    <div class="note-card" onclick="viewNote('${note.id}')">
+                        <h3>${note.title}</h3>
+                        <p>${note.content.substring(0, 50)}...</p>
+                        <small>${new Date(note.created).toLocaleDateString()}</small>
+                    </div>
+                `).join('');
+            });
+        }
+
+        // 关闭弹窗
+        function closeEditor() {
+            document.getElementById('editorModal').style.display = 'none';
+        }
+
+        function closeDetail() {
+            document.getElementById('detailModal').style.display = 'none';
+        }
+
+        // 页面切换
         function showPage(pageId) {
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
@@ -196,54 +360,9 @@
             document.getElementById(pageId).classList.add('active');
         }
 
-        // 纪念日倒计时
-        function updateAnniversary() {
-            const startDate = new Date('2020-10-16');
-            const currentDate = new Date();
-            
-            let targetYear = startDate.getFullYear() + Math.ceil((currentDate - startDate) / (1000 * 86400 * 365));
-            const targetDate = new Date(startDate);
-            targetDate.setFullYear(targetYear);
-            
-            const diffDays = Math.ceil((targetDate - currentDate) / (1000 * 3600 * 24));
-            document.getElementById('countdown').textContent = `距离${targetYear}年纪念日还有 ${diffDays} 天`;
-        }
-        setInterval(updateAnniversary, 1000);
-
-        // 照片上传功能
-        async function uploadPhoto() {
-            const files = document.getElementById('fileInput').files;
-            if(files.length === 0) return;
-
-            Array.from(files).forEach(async file => {
-                try {
-                    const storageRef = storage.ref(`photos/${Date.now()}_${file.name}`);
-                    const uploadTask = storageRef.put(file);
-
-                    uploadTask.on('state_changed',
-                        snapshot => {
-                            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                            document.getElementById('uploadStatus').textContent = 
-                                `上传中: ${file.name} (${Math.round(progress)}%)`;
-                        },
-                        error => {
-                            console.error('上传失败:', error);
-                        },
-                        async () => {
-                            const url = await storageRef.getDownloadURL();
-                            await db.collection('photos').add({ url, timestamp: new Date() });
-                            document.getElementById('uploadStatus').textContent = `${file.name} 上传成功!`;
-                            loadPhotos();
-                        }
-                    );
-                } catch (error) {
-                    console.error('上传错误:', error);
-                }
-            });
-        }
-
-        // 加载照片
-        function loadPhotos() {
+        // 初始化加载
+        document.addEventListener('DOMContentLoaded', () => {
+            // 加载照片
             db.collection('photos').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
                 const photos = [];
                 snapshot.forEach(doc => photos.push(doc.data().url));
@@ -258,70 +377,23 @@
                 renderPhotos('photoGrid');
                 renderPhotos('homePhotos');
             });
-        }
-        loadPhotos();
 
-        // 恋爱笔记功能
-        let currentNoteId = null;
-        
-        function openEditor(noteId = null) {
-            currentNoteId = noteId;
-            document.getElementById('noteModal').style.display = 'flex';
-            if(noteId) loadNote(noteId);
-        }
+            // 加载笔记
+            loadNotes();
 
-        function closeEditor() {
-            document.getElementById('noteModal').style.display = 'none';
-            document.getElementById('noteTitle').value = '';
-            document.getElementById('noteContent').value = '';
-            currentNoteId = null;
-        }
-
-        async function saveNote() {
-            const noteData = {
-                title: document.getElementById('noteTitle').value,
-                content: document.getElementById('noteContent').value,
-                date: new Date().toISOString()
-            };
-
-            try {
-                if(currentNoteId) {
-                    await db.collection('notes').doc(currentNoteId).update(noteData);
-                } else {
-                    await db.collection('notes').add(noteData);
-                }
-                closeEditor();
-                loadNotes();
-            } catch (error) {
-                console.error('保存笔记失败:', error);
-            }
-        }
-
-        function loadNotes() {
-            db.collection('notes').orderBy('date', 'desc').onSnapshot(snapshot => {
-                const notes = [];
-                snapshot.forEach(doc => {
-                    notes.push({ id: doc.id, ...doc.data() });
-                });
+            // 纪念日倒计时
+            const startDate = new Date('2020-10-16');
+            function updateAnniversary() {
+                const currentDate = new Date();
+                let targetYear = startDate.getFullYear() + Math.ceil((currentDate - startDate) / (1000 * 86400 * 365));
+                const targetDate = new Date(startDate).setFullYear(targetYear);
                 
-                document.getElementById('noteList').innerHTML = notes.map(note => `
-                    <div class="note-item" onclick="openEditor('${note.id}')">
-                        <h3>${note.title}</h3>
-                        <p>${note.content.substring(0, 50)}...</p>
-                    </div>
-                `).join('');
-            });
-        }
-        loadNotes();
-
-        // 初始化事件
-        document.addEventListener('DOMContentLoaded', () => {
+                const diffDays = Math.ceil((targetDate - currentDate) / (1000 * 3600 * 24));
+                document.getElementById('countdown').textContent = 
+                    `距离 ${targetYear} 周年纪念日还有 ${diffDays} 天`;
+            }
+            setInterval(updateAnniversary, 1000);
             updateAnniversary();
-            document.getElementById('noteModal').addEventListener('click', event => {
-                if(event.target === document.getElementById('noteModal')) {
-                    closeEditor();
-                }
-            });
         });
     </script>
 </body>
