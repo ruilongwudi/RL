@@ -23,6 +23,7 @@
             min-height: 100vh;
         }
 
+        /* 导航栏优化 */
         .nav-bar {
             display: flex;
             justify-content: center;
@@ -48,24 +49,38 @@
         .nav-btn.active {
             background: var(--primary);
             color: white;
+            transform: scale(1.05);
         }
 
-        .page {
-            display: none;
-            padding: 2rem 10%;
+        /* 首页优化设计 */
+        #home {
+            text-align: center;
+            padding: 3rem 5%;
         }
 
-        .page.active {
-            display: block;
-            animation: fadeIn 0.3s ease;
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 20px;
+            padding: 3rem;
+            margin: 2rem auto;
+            max-width: 800px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            color: white;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .countdown-text {
+            font-size: 1.5rem;
+            margin: 1rem 0;
         }
 
-        /* 照片墙样式 */
+        .countdown-number {
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin: 1rem 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        /* 照片墙优化 */
         .gallery-container {
             max-width: 1200px;
             margin: 0 auto;
@@ -87,7 +102,11 @@
             transition: transform 0.3s;
         }
 
-        /* 上传组件 */
+        .photo-card:hover {
+            transform: scale(1.03);
+        }
+
+        /* 上传组件修复 */
         .upload-section {
             background: white;
             border-radius: 20px;
@@ -97,7 +116,13 @@
             text-align: center;
         }
 
-        /* 笔记系统 */
+        .upload-status {
+            margin-top: 1rem;
+            color: var(--primary);
+            min-height: 1.5rem;
+        }
+
+        /* 笔记系统优化 */
         .note-editor {
             background: white;
             border-radius: 20px;
@@ -138,7 +163,7 @@
             font-size: 1rem;
         }
 
-        /* 笔记列表 */
+        /* 笔记列表优化 */
         .note-list {
             margin-top: 2rem;
         }
@@ -157,7 +182,7 @@
             transform: translateY(-3px);
         }
 
-        /* 弹窗样式 */
+        /* 弹窗优化 */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -191,9 +216,10 @@
 
     <!-- 首页 -->
     <section id="home" class="page active">
-        <div class="countdown-box">
+        <div class="hero-section">
             <h2>❤️ 我们的恋爱纪念日 ❤️</h2>
-            <div id="countdown">正在计算...</div>
+            <div class="countdown-text">距离下一个周年纪念日还有</div>
+            <div class="countdown-number" id="countdown">加载中...</div>
         </div>
         <div class="photo-grid" id="homePhotos"></div>
     </section>
@@ -205,7 +231,7 @@
                 <input type="file" id="fileInput" multiple accept="image/*" hidden>
                 <label for="fileInput" class="nav-btn">📷 选择照片</label>
                 <button id="uploadButton" class="nav-btn">🚀 开始上传</button>
-                <div id="uploadStatus"></div>
+                <div id="uploadStatus" class="upload-status"></div>
             </div>
             <div class="photo-grid" id="photoGrid"></div>
         </div>
@@ -245,11 +271,11 @@
         const db = firebase.firestore();
         const storage = firebase.storage();
 
-        // 🚀 页面切换功能（修复版）
+        // 🚀 页面切换（修复版）
         document.addEventListener('DOMContentLoaded', () => {
             document.querySelector('.nav-bar').addEventListener('click', (e) => {
-                if (e.target.matches('.nav-btn')) {
-                    // 移除所有激活状态
+                if (e.target.classList.contains('nav-btn')) {
+                    // 切换激活状态
                     document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
                     document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
                     
@@ -261,45 +287,51 @@
             });
         });
 
-        // 📸 可靠的照片上传功能
+        // 📸 彻底修复照片上传功能
         document.getElementById('uploadButton').addEventListener('click', async () => {
             const files = document.getElementById('fileInput').files;
-            if (files.length === 0) return alert('请选择照片');
+            if (files.length === 0) return alert('请先选择照片');
 
             try {
                 for (const file of files) {
+                    // 生成唯一文件名
                     const filename = `${Date.now()}_${file.name}`;
                     const storageRef = storage.ref(`photos/${filename}`);
+                    
+                    // 显示上传进度
                     const uploadTask = storageRef.put(file);
+                    uploadTask.on('state_changed',
+                        snapshot => {
+                            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                            document.getElementById('uploadStatus').textContent = 
+                                `上传进度: ${Math.round(progress)}%`;
+                        },
+                        error => {
+                            throw new Error(`上传失败: ${error.message}`);
+                        }
+                    );
 
-                    await new Promise((resolve, reject) => {
-                        uploadTask.on('state_changed',
-                            snapshot => {
-                                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                                document.getElementById('uploadStatus').textContent = 
-                                    `上传进度: ${Math.round(progress)}%`;
-                            },
-                            reject,
-                            resolve
-                        );
-                    });
-
+                    await uploadTask;
                     const url = await storageRef.getDownloadURL();
+                    
+                    // 保存到数据库
                     await db.collection('photos').add({
                         url,
                         timestamp: firebase.firestore.FieldValue.serverTimestamp()
                     });
                 }
-                document.getElementById('uploadStatus').textContent = '上传成功！';
+                
+                document.getElementById('uploadStatus').textContent = '🎉 上传成功！';
                 setTimeout(() => document.getElementById('uploadStatus').textContent = '', 3000);
                 loadPhotos();
             } catch (error) {
-                console.error('上传失败:', error);
-                document.getElementById('uploadStatus').textContent = `错误: ${error.message}`;
+                console.error(error);
+                document.getElementById('uploadStatus').textContent = error.message;
+                setTimeout(() => document.getElementById('uploadStatus').textContent = '', 5000);
             }
         });
 
-        // 💌 可靠的笔记系统
+        // 💌 可靠笔记保存功能
         let selectedCategory = 'happy';
         document.querySelectorAll('.category-btn').forEach(btn => {
             btn.addEventListener('click', function() {
@@ -314,17 +346,20 @@
             if (!content) return alert('请输入内容');
 
             try {
-                await db.collection('notes').add({
+                // 保存到数据库
+                const docRef = await db.collection('notes').add({
                     content,
                     category: selectedCategory,
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
+                
+                // 清空输入框
                 document.getElementById('noteContent').value = '';
+                alert('✅ 保存成功！');
                 loadNotes();
-                alert('保存成功！');
             } catch (error) {
                 console.error('保存失败:', error);
-                alert('保存失败，请检查网络');
+                alert('❌ 保存失败，请检查网络连接');
             }
         });
 
@@ -332,13 +367,13 @@
         function loadPhotos() {
             db.collection('photos').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
                 const photos = snapshot.docs.map(doc => doc.data().url);
-                const render = (containerId) => {
+                const renderPhotos = (containerId) => {
                     document.getElementById(containerId).innerHTML = photos
-                        .map(url => `<div class="photo-card" style="background-image:url('${url}')"></div>`)
+                        .map(url => `<div class="photo-card" style="background-image: url('${url}')"></div>`)
                         .join('');
                 };
-                render('photoGrid');
-                render('homePhotos');
+                renderPhotos('photoGrid');
+                renderPhotos('homePhotos');
             });
         }
 
@@ -356,31 +391,32 @@
                             ${getCategoryLabel(note.category)}
                         </div>
                         <small>${note.date}</small>
-                        <p>${note.content}</p>
+                        <p>${note.content.substring(0, 80)}</p>
                     </div>
                 `).join('');
 
-                // 绑定点击事件（修复版）
-                document.getElementById('noteList').addEventListener('click', (e) => {
-                    const noteItem = e.target.closest('.note-item');
-                    if (noteItem) showNoteDetail(noteItem.dataset.id);
+                // 绑定点击事件
+                document.querySelectorAll('.note-item').forEach(item => {
+                    item.addEventListener('click', () => showNoteDetail(item.dataset.id));
                 });
             });
         }
 
-        // 🖼️ 笔记详情弹窗（修复版）
+        // 🖼️ 笔记详情弹窗（优化版）
         async function showNoteDetail(noteId) {
             try {
                 const doc = await db.collection('notes').doc(noteId).get();
+                const note = doc.data();
+
                 const modal = document.createElement('div');
                 modal.className = 'modal-overlay';
                 modal.innerHTML = `
                     <div class="note-detail">
-                        <div class="category-tag ${doc.data().category}">
-                            ${getCategoryLabel(doc.data().category)}
+                        <div class="category-tag ${note.category}">
+                            ${getCategoryLabel(note.category)}
                         </div>
                         <h3>${doc.data().timestamp.toDate().toLocaleString()}</h3>
-                        <pre>${doc.data().content}</pre>
+                        <pre>${note.content}</pre>
                         <button class="nav-btn" onclick="this.parentElement.parentElement.remove()">关闭</button>
                     </div>
                 `;
