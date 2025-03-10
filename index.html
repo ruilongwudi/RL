@@ -3,167 +3,188 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的个人博客</title>
+    <title>❤️我们的爱情日记❤️</title>
     
-    <!-- 引入Bootstrap CSS -->
+    <!-- 引入样式库 -->
     <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
-    <!-- 自定义样式 -->
     <style>
-        /* 自定义配色方案 */
         :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
+            --love-red: #ff4b5a;
+            --love-pink: #ffb6c1;
+            --love-gold: #ffd700;
         }
         
         body {
-            background: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
-            min-height: 100vh;
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe6e6 100%);
+            font-family: 'Microsoft YaHei', sans-serif;
         }
         
-        .navbar {
-            background: rgba(255,255,255,0.95) !important;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        .love-header {
+            background: url('images/header-bg.jpg') center/cover;
+            height: 60vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
         }
         
-        .blog-header {
-            text-align: center;
-            padding: 4rem 0;
-            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            margin-bottom: 2rem;
+        .header-overlay {
+            background: rgba(255, 75, 90, 0.3);
+            position: absolute;
+            width: 100%;
+            height: 100%;
         }
         
-        .article-card {
-            transition: transform 0.3s ease;
-            background: white;
+        .countdown-box {
+            background: rgba(255,255,255,0.9);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(255,75,90,0.2);
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding: 20px 0;
+            border-left: 3px solid var(--love-red);
+            margin-left: 25px;
+        }
+        
+        .timeline-item::before {
+            content: '❤️';
+            position: absolute;
+            left: -30px;
+            top: 0;
+            font-size: 24px;
+        }
+        
+        .photo-gallery {
+            column-count: 3;
+            column-gap: 1rem;
+        }
+        
+        .photo-gallery img {
+            width: 100%;
+            margin-bottom: 1rem;
             border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
         }
         
-        .article-card:hover {
-            transform: translateY(-5px);
-        }
-        
-        footer {
-            background: var(--primary-color);
-            color: white;
-            padding: 2rem 0;
-            margin-top: 4rem;
+        .photo-gallery img:hover {
+            transform: scale(1.05);
         }
     </style>
 </head>
 <body>
 
-<!-- 导航栏 -->
-<nav class="navbar navbar-expand-lg navbar-light fixed-top">
-    <div class="container">
-        <a class="navbar-brand" href="#">我的博客</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item">
-                    <a class="nav-link active" href="#">首页</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#about">关于我</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#contact">联系</a>
-                </li>
-            </ul>
-        </div>
-    </div>
-</nav>
-
-<!-- 博客头部 -->
-<header class="blog-header">
-    <div class="container">
-        <h1 class="display-4">欢迎来到我的数字空间</h1>
-        <p class="lead">分享技术心得与生活感悟</p>
+<!-- 浪漫头部 -->
+<header class="love-header">
+    <div class="header-overlay"></div>
+    <div class="text-center text-white">
+        <h1 class="display-3">❤️ 我们的爱情故事 ❤️</h1>
+        <p class="lead">从相遇那天起，每一天都值得纪念</p>
     </div>
 </header>
 
-<!-- 主要内容 -->
-<main class="container">
-    <!-- 最新文章 -->
-    <section class="row g-4 mb-5">
-        <div class="col-md-8">
-            <h2 class="mb-4">最新文章</h2>
-            
-            <!-- 文章卡片 -->
-            <div class="article-card mb-4">
-                <img src="https://picsum.photos/800/400" class="card-img-top" alt="文章配图">
-                <div class="p-4">
-                    <h3>我的第一篇文章</h3>
-                    <div class="text-muted mb-3">发布日期：2023年8月15日</div>
-                    <p>这里是文章摘要内容，简要说明文章的核心观点和主要内容...</p>
-                    <a href="#" class="btn btn-primary">阅读全文</a>
-                </div>
-            </div>
-        </div>
-        
-        <!-- 侧边栏 -->
-        <div class="col-md-4">
-            <div class="p-4 bg-white rounded shadow-sm">
-                <h4>关于作者</h4>
-                <img src="https://picsum.photos/200" class="rounded-circle mb-3" alt="作者头像" style="width: 100px;">
-                <p>我是XXX，一名热爱技术的开发者，喜欢分享学习心得。</p>
-                
-                <h5 class="mt-4">分类标签</h5>
-                <div class="d-flex flex-wrap gap-2">
-                    <a href="#" class="badge bg-secondary">技术分享</a>
-                    <a href="#" class="badge bg-secondary">生活随笔</a>
-                    <a href="#" class="badge bg-secondary">学习笔记</a>
-                </div>
-            </div>
-        </div>
-    </section>
+<!-- 纪念日倒计时 -->
+<section class="container py-5">
+    <div class="countdown-box text-center">
+        <h3><i class="fas fa-heartbeat me-2"></i>恋爱纪念日倒计时</h3>
+        <div id="countdown" class="display-4 text-danger my-3"></div>
+        <small>下一个纪念日：相恋1000天</small>
+    </div>
+</section>
 
-    <!-- 联系表单 -->
-    <section id="contact" class="mb-5">
-        <h2 class="mb-4">联系我</h2>
-        <div class="row">
-            <div class="col-md-6">
-                <form>
-                    <div class="mb-3">
-                        <label for="name" class="form-label">姓名</label>
-                        <input type="text" class="form-control" id="name" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="email" class="form-label">邮箱</label>
-                        <input type="email" class="form-control" id="email" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="message" class="form-label">留言内容</label>
-                        <textarea class="form-control" id="message" rows="4" required></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary">发送消息</button>
-                </form>
-            </div>
+<!-- 爱情时间轴 -->
+<section class="container py-5">
+    <h2 class="text-center mb-5"><i class="fas fa-book-open me-2"></i>爱情回忆录</h2>
+    <div class="timeline">
+        <div class="timeline-item">
+            <h4>初次相遇</h4>
+            <p class="text-muted">2020年9月1日</p>
+            <p>在学校的图书馆，你的微笑点亮了整个秋天 ❤️</p>
+            <img src="images/memory1.jpg" class="img-fluid rounded" alt="相遇照片">
         </div>
-    </section>
-</main>
+        <!-- 添加更多时间轴项 -->
+    </div>
+</section>
 
-<!-- 页脚 -->
-<footer>
-    <div class="container text-center">
-        <p>&copy; 2023 我的博客. 保留所有利</p>
-        <div class="social-links">
-            <a href="#" class="text-white mx-2"><i class="fab fa-github"></i></a>
-            <a href="#" class="text-white mx-2"><i class="fab fa-weixin"></i></a>
-            <a href="#" class="text-white mx-2"><i class="fas fa-envelope"></i></a>
+<!-- 照片墙 -->
+<section class="container py-5">
+    <h2 class="text-center mb-5"><i class="fas fa-camera-retro me-2"></i>甜蜜瞬间</h2>
+    <div class="photo-gallery">
+        <img src="images/gallery1.jpg" alt="我们的照片">
+        <img src="images/gallery2.jpg" alt="旅行记忆">
+        <!-- 添加更多图片 -->
+    </div>
+</section>
+
+<!-- 留言祝福墙 -->
+<section class="container py-5">
+    <h2 class="text-center mb-5"><i class="fas fa-comments me-2"></i>朋友祝福</h2>
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <form id="wish-form" action="https://formspree.io/f/your-form-id" method="POST">
+                <div class="mb-3">
+                    <input type="text" name="name" class="form-control" placeholder="你的名字" required>
+                </div>
+                <div class="mb-3">
+                    <textarea name="message" class="form-control" rows="4" placeholder="写下祝福..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-danger w-100"><i class="fas fa-paper-plane me-2"></i>发送祝福</button>
+            </form>
+            <div id="wish-wall" class="mt-4">
+                <!-- 祝福留言将显示在这里 -->
+            </div>
         </div>
     </div>
-</footer>
+</section>
 
-<!-- 引入Bootstrap JS -->
+<!-- 脚本部分 -->
 <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-<!-- 引入Font Awesome图标 -->
-<script src="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+<script>
+    // 纪念日倒计时
+    function updateCountdown() {
+        const targetDate = new Date('2023-12-31');
+        const now = new Date();
+        const diff = targetDate - now;
+        
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        document.getElementById('countdown').innerHTML = `
+            ${days} 天
+        `;
+    }
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+
+    // 处理留言表单
+    document.getElementById('wish-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        
+        try {
+            await fetch(e.target.action, {
+                method: 'POST',
+                body: formData,
+                headers: { 'Accept': 'application/json' }
+            });
+            
+            const wishWall = document.getElementById('wish-wall');
+            wishWall.innerHTML += `
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5>${formData.get('name')}</h5>
+                        <p>${formData.get('message')}</p>
+                    </div>
+                </div>
+            `;
+            e.target.reset();
+        } catch (error) {
+            alert('提交失败，请稍后重试');
+        }
+    });
+</script>
 
 </body>
 </html>
