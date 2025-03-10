@@ -3,174 +3,201 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>❤️ 我们的时光博物馆 ❤️</title>
+    <title>Timeline of Us</title>
     <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --love-pink: #FFB7C5;
-            --love-purple: #D8BFD8;
-            --text-dark: #4A4A4A;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #fff5f5 0%, #f8f0ff 100%);
-            font-family: 'Microsoft YaHei', sans-serif;
-            color: var(--text-dark);
+            --primary: #FFE2E6;
+            --accent: #D4A5A5;
+            --gold: #CFB997;
         }
 
-        /* 极简导航栏 */
-        .love-nav {
-            backdrop-filter: blur(10px);
-            background: rgba(255,255,255,0.95);
-            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        body {
+            background: linear-gradient(15deg, #fff8f9, #fff1f5);
+            font-family: 'Helvetica Neue', sans-serif;
+            color: #4a4a4a;
+            line-height: 1.8;
         }
-        
-        /* 时间轴设计 */
-        .timeline::before {
-            background: var(--love-pink);
-            width: 3px;
+
+        /* 沉浸式标题 */
+        .hero-section {
+            height: 70vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(rgba(255,226,230,0.9), rgba(255,226,230,0.7)),
+                        url('images/hero-bg.jpg') center/cover;
+            position: relative;
+            clip-path: polygon(0 0, 100% 0, 100% 90%, 0 100%);
+        }
+
+        .hero-title {
+            font-size: 4rem;
+            letter-spacing: 0.1em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        .hero-title::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
             left: 50%;
             transform: translateX(-50%);
+            width: 60px;
+            height: 2px;
+            background: var(--accent);
         }
-        
+
+        /* 时间线容器 */
+        .timeline-container {
+            max-width: 1200px;
+            margin: -100px auto 0;
+            padding: 0 2rem;
+        }
+
+        /* 时间线项 */
         .timeline-item {
-            background: rgba(255,255,255,0.9);
+            background: rgba(255,255,255,0.95);
             border-radius: 15px;
-            box-shadow: 0 5px 25px rgba(255,183,197,0.2);
+            padding: 2.5rem;
+            margin-bottom: 3rem;
+            box-shadow: 0 10px 30px rgba(212,165,165,0.1);
             transition: transform 0.3s ease;
+            position: relative;
         }
-        
         .timeline-item:hover {
             transform: translateY(-5px);
         }
 
+        /* 时间线装饰元素 */
+        .timeline-item::before {
+            content: '❤️';
+            position: absolute;
+            left: -45px;
+            top: 30px;
+            font-size: 1.8rem;
+            opacity: 0.8;
+        }
+
         /* 纪念日卡片 */
         .anniversary-card {
-            background: linear-gradient(45deg, var(--love-pink), var(--love-purple));
-            color: white;
-            border-radius: 20px;
+            background: linear-gradient(45deg, var(--primary), #FFEBEF);
+            border: 1px solid rgba(212,165,165,0.2);
+            border-radius: 18px;
+            padding: 3rem;
+            text-align: center;
             position: relative;
             overflow: hidden;
         }
-        
-        .anniversary-card::after {
-            content: '❤️';
+        .anniversary-card::before {
+            content: '';
             position: absolute;
-            right: -30px;
-            bottom: -30px;
-            font-size: 8rem;
-            opacity: 0.15;
+            top: -50px;
+            right: -50px;
+            width: 120px;
+            height: 120px;
+            background: rgba(212,165,165,0.1);
+            border-radius: 50%;
+        }
+
+        /* 图片画廊 */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            padding: 2rem 0;
+        }
+        .gallery-item {
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            transition: transform 0.3s;
+        }
+        .gallery-item:hover {
+            transform: scale(1.03);
+        }
+        .gallery-item img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
         }
     </style>
 </head>
 <body>
 
-<!-- 动态导航 -->
-<nav class="love-nav fixed-top py-3">
-    <div class="container d-flex justify-content-between align-items-center">
-        <a class="h4 mb-0 text-dark" href="#">💑 2016.10.16</a>
-        <div>
-            <a href="#memory" class="text-dark mx-3">时光轴</a>
-            <a href="#anniversary" class="text-dark mx-3">纪念日</a>
-            <a href="#wishes" class="text-dark mx-3">留言墙</a>
-        </div>
+<!-- 沉浸式标题区 -->
+<section class="hero-section">
+    <div class="text-center">
+        <h1 class="hero-title text-gold">OUR STORY</h1>
+        <p class="mt-4 h5">Since October 16, 2020</p>
     </div>
-</nav>
+</section>
 
-<!-- 主内容区 -->
-<main class="container py-5" style="margin-top: 80px;">
+<!-- 主内容容器 -->
+<main class="timeline-container">
     
-    <!-- 恋爱里程碑 -->
-    <section id="memory" class="mb-5">
-        <h2 class="text-center mb-5">❤️ 我们的爱情轨迹</h2>
-        <div class="timeline">
-            <!-- 时间轴项示例 -->
-            <div class="timeline-item p-4 mb-4">
-                <div class="row align-items-center">
-                    <div class="col-md-6">
-                        <img src="images/memory1.jpg" class="img-fluid rounded" alt="初遇时刻">
-                    </div>
-                    <div class="col-md-6 mt-3 mt-md-0">
-                        <h4>2020.10.16 - 命运的交点</h4>
-                        <p class="text-muted">在咖啡厅的午后，你的笑容像阳光穿透云层...</p>
-                        <div class="d-flex">
-                            <span class="badge bg-pink me-2">初遇</span>
-                            <span class="badge bg-purple">纪念日</span>
-                        </div>
-                    </div>
+    <!-- 纪念日卡片 -->
+    <section class="anniversary-card mb-5">
+        <div class="row align-items-center">
+            <div class="col-md-4">
+                <div class="display-4 text-accent">1036</div>
+                <p class="text-muted">Days Together</p>
+            </div>
+            <div class="col-md-8 text-start">
+                <h3>Next Milestone</h3>
+                <p class="mb-1">3rd Anniversary</p>
+                <div class="progress" style="height: 4px;">
+                    <div class="progress-bar bg-accent" style="width: 75%"></div>
                 </div>
             </div>
-            <!-- 更多时间轴项 -->
         </div>
     </section>
 
-    <!-- 纪念日模块 -->
-    <section id="anniversary" class="mb-5">
-        <div class="anniversary-card p-5 text-center">
-            <h3 class="mb-4">⌛ 相爱第 <span id="loveDays">...</span> 天</h3>
-            <div class="display-4 mb-3" id="nextAnniversary"></div>
-            <p>距离下一个百日纪念还有 <span id="countdown">...</span></p>
-        </div>
-    </section>
-
-    <!-- 互动留言墙 -->
-    <section id="wishes" class="mb-5">
-        <div class="bg-white p-4 rounded-3 shadow-sm">
-            <h4 class="mb-4">💬 朋友祝福墙</h4>
-            <form id="wishForm" class="mb-4">
-                <div class="input-group">
-                    <input type="text" class="form-control" placeholder="写下祝福..." required>
-                    <button class="btn btn-pink" type="submit">放飞祝福</button>
+    <!-- 重要时刻时间线 -->
+    <article class="timeline-item">
+        <div class="row">
+            <div class="col-md-4 mb-4 mb-md-0">
+                <img src="images/memory-1.jpg" alt="First Meeting" class="rounded-lg">
+            </div>
+            <div class="col-md-8">
+                <div class="text-accent mb-2">October 16, 2020</div>
+                <h3 class="h4 mb-3">First Encounter</h3>
+                <p>在那个秋意渐浓的午后，我们在街角的咖啡店相遇。阳光透过玻璃窗洒在你的侧脸，那一刻时间仿佛静止...</p>
+                <div class="mt-4">
+                    <span class="badge bg-primary">初遇</span>
+                    <span class="badge bg-accent">咖啡时光</span>
                 </div>
-            </form>
-            <div id="wishContainer">
-                <!-- 动态加载留言 -->
             </div>
         </div>
+    </article>
+
+    <!-- 更多时间线项 -->
+    
+    <!-- 照片画廊 -->
+    <section class="gallery-grid">
+        <div class="gallery-item">
+            <img src="images/gallery-1.jpg" alt="Memory Photo">
+        </div>
+        <div class="gallery-item">
+            <img src="images/gallery-2.jpg" alt="Memory Photo">
+        </div>
+        <!-- 添加更多图片 -->
     </section>
 </main>
 
 <script>
-    // 恋爱天数计算（开始日期设为2020-10-16）
+    // 自动计算天数
     const startDate = new Date('2020-10-16');
     const today = new Date();
-    const timeDiff = today - startDate;
-    const loveDays = Math.floor(timeDiff / (1000 * 3600 * 24));
-    document.getElementById('loveDays').textContent = loveDays;
+    const timeDiff = today.getTime() - startDate.getTime();
+    const days = Math.floor(timeDiff / (1000 * 3600 * 24));
+    document.querySelector('.anniversary-card .display-4').textContent = days;
 
-    // 纪念日倒计时
-    function updateAnniversary() {
-        const nextDate = new Date(startDate);
-        nextDate.setDate(startDate.getDate() + Math.ceil(loveDays/100)*100);
-        
-        const diff = nextDate - today;
-        const days = Math.ceil(diff / (1000 * 3600 * 24));
-        
-        document.getElementById('nextAnniversary').textContent = 
-            `${nextDate.getFullYear()}.${nextDate.getMonth()+1}.${nextDate.getDate()}`;
-        document.getElementById('countdown').textContent = 
-            `${days} 天`;
-    }
-    updateAnniversary();
-
-    // 留言功能
-    document.getElementById('wishForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const input = this.querySelector('input');
-        const wishText = input.value.trim();
-        
-        if(wishText) {
-            const wishElement = document.createElement('div');
-            wishElement.className = 'alert alert-light mt-2';
-            wishElement.innerHTML = `
-                <div class="d-flex align-items-center">
-                    <i class="fas fa-heart text-pink me-3"></i>
-                    ${wishText}
-                </div>
-            `;
-            document.getElementById('wishContainer').prepend(wishElement);
-            input.value = '';
-        }
+    // 进度条动画
+    window.addEventListener('scroll', () => {
+        const progressBar = document.querySelector('.progress-bar');
+        const scrollPercent = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
+        progressBar.style.width = Math.min(scrollPercent * 100 + 25, 100) + '%';
     });
 </script>
 
